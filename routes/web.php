@@ -19,7 +19,9 @@ use Inertia\Inertia;
 */
 
 Route::get('/', [SemproController::class, 'index']);
-Route::post('/sempro', [SemproController::class, 'store']);
+Route::middleware('auth')->group(function () {
+    Route::post('/sempro', [SemproController::class, 'store']);
+});
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
