@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
 
-use function Pest\Laravel\get;
 
 class HandleInertiaRequests extends Middleware
 {

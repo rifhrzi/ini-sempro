@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\SemproCollection;
 use App\Models\Sempro;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,12 +15,8 @@ class SemproController extends Controller
      */
     public function index()
     {
-        $sempro = new SemproCollection(Sempro::paginate(8));
-        return Inertia::render('Homepage', [
-            'title' => "SEMPRO INI",
-            'description' => "DUAR",
-            'sempro' => $sempro,
-        ]);
+        // Homepage removed; redirect to the new homepage (Dashboard)
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -31,7 +26,8 @@ class SemproController extends Controller
      */
     public function create()
     {
-        //
+        // Render the Sempro submission form page
+        return Inertia::render('Sempro/Create');
     }
 
     /**
@@ -42,13 +38,22 @@ class SemproController extends Controller
      */
     public function store(Request $request)
     {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:5000'],
+            'category' => ['required', 'string', 'max:100'],
+        ]);
+
         $sempro = new Sempro();
-        $sempro->title = $request->title;
-        $sempro->description = $request->description;
-        $sempro->category = $request->category;
-        $sempro->author = auth()->user()->email;
+        $sempro->title = $validated['title'];
+        $sempro->description = $validated['description'];
+        $sempro->category = $validated['category'];
+        // Prefer FK to users for integrity, keep denormalized email
+        $sempro->author_id = optional(auth()->user())->id;
+        $sempro->author = optional(auth()->user())->email;
         $sempro->save();
-        return redirect()->back()->with('message', 'ini sudah benar');
+
+        return redirect()->back()->with('message', 'Sempro saved successfully.');
         
         
     }

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
+import Flash from '@/Components/Flash';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
@@ -7,6 +9,8 @@ import { Link } from '@inertiajs/react';
 
 export default function Authenticated({ auth, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+
+    const isAdmin = Boolean(auth?.user?.is_admin);
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -24,6 +28,11 @@ export default function Authenticated({ auth, header, children }) {
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
                                     Dashboard
                                 </NavLink>
+                                {isAdmin && (
+                                    <NavLink href={route('admin.dashboard')} active={route().current('admin.dashboard')}>
+                                        Admin
+                                    </NavLink>
+                                )}
                             </div>
                         </div>
 
@@ -95,6 +104,11 @@ export default function Authenticated({ auth, header, children }) {
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
                             Dashboard
                         </ResponsiveNavLink>
+                        {isAdmin && (
+                            <ResponsiveNavLink href={route('admin.dashboard')} active={route().current('admin.dashboard')}>
+                                Admin
+                            </ResponsiveNavLink>
+                        )}
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
@@ -120,6 +134,11 @@ export default function Authenticated({ auth, header, children }) {
                     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">{header}</div>
                 </header>
             )}
+
+            {/* Flash messages */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                <Flash message={usePage().props?.flash?.message} />
+            </div>
 
             <main>{children}</main>
         </div>

@@ -32,6 +32,13 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Mark the user as having signed in at least once
+        if ($request->user()) {
+            $request->user()->forceFill([
+                'last_login_at' => now(),
+            ])->save();
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(RouteServiceProvider::HOME);
