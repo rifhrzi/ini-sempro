@@ -11,7 +11,14 @@ class Iuran extends Model
 {
     use HasFactory;
 
+    /**
+     * Nominal iuran tetap per periode (dalam rupiah).
+     */
     public const FIXED_AMOUNT = 120_000;
+
+    /**
+     * Lama satu periode pembayaran dalam bulan.
+     */
     public const PAYMENT_PERIOD_MONTHS = 3;
 
     protected $fillable = [
@@ -33,8 +40,12 @@ class Iuran extends Model
         'proof_url',
     ];
 
+    /**
+     * Menandai pembayaran lama sebagai belum lunas saat periode aktif sudah lewat.
+     */
     public static function expireStalePayments(): void
     {
+        // Hitung tanggal batas berdasarkan panjang periode iuran.
         $threshold = Carbon::now()->subMonthsNoOverflow(static::PAYMENT_PERIOD_MONTHS);
 
         static::query()
@@ -44,11 +55,17 @@ class Iuran extends Model
             ->update(['paid' => false]);
     }
 
+    /**
+     * Relasi ke pengguna yang melakukan pembayaran.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Menghasilkan URL publik untuk bukti pembayaran yang tersimpan.
+     */
     public function getProofUrlAttribute(): ?string
     {
         return $this->proof_path ? Storage::url($this->proof_path) : null;

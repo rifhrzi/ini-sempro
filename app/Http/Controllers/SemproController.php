@@ -9,32 +9,23 @@ use Inertia\Inertia;
 class SemproController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Halaman indeks dialihkan ke dashboard utama.
      */
     public function index()
     {
-        // Homepage removed; redirect to the new homepage (Dashboard)
         return redirect()->route('dashboard');
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Menampilkan formulir pengajuan proposal seminar.
      */
     public function create()
     {
-        // Render the Sempro submission form page
         return Inertia::render('Sempro/Create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Menyimpan data pengajuan yang dikirim user.
      */
     public function store(Request $request)
     {
@@ -48,59 +39,34 @@ class SemproController extends Controller
         $sempro->title = $validated['title'];
         $sempro->description = $validated['description'];
         $sempro->category = $validated['category'];
-        // Prefer FK to users for integrity, keep denormalized email
+        // Simpan relasi penulis agar admin dapat menelusuri siapa pengusulnya.
         $sempro->author_id = optional(auth()->user())->id;
         $sempro->author = optional(auth()->user())->email;
         $sempro->save();
 
         return redirect()->back()->with('message', 'Sempro saved successfully.');
-        
-        
     }
-    
-    
+
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Sempro  $sempro
-     * @return \Illuminate\Http\Response
+     * Endpoint lain belum digunakan saat ini.
      */
     public function show(Sempro $sempro)
     {
-        //
+        // Disengaja dikosongkan sampai kebutuhan detail muncul.
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Sempro  $sempro
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Sempro $sempro)
     {
-        //
+        // Disengaja dikosongkan sampai kebutuhan pengeditan muncul.
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Sempro  $sempro
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Sempro $sempro)
     {
-        //
+        // Disengaja dikosongkan sampai kebutuhan pembaruan muncul.
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Sempro  $sempro
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Sempro $sempro)
     {
-        //
+        // Disengaja dikosongkan sampai mekanisme hapus disepakati.
     }
 }

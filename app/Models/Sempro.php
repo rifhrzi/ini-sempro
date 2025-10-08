@@ -11,7 +11,7 @@ class Sempro extends Model
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
+     * Kolom yang dapat diisi melalui mass-assignment.
      */
     protected $fillable = [
         'title',
@@ -22,7 +22,7 @@ class Sempro extends Model
     ];
 
     /**
-     * Author user relationship.
+     * Relasi ke akun pengguna yang mengajukan proposal.
      */
     public function authorUser()
     {

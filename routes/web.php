@@ -44,6 +44,9 @@ Route::middleware('auth')->group(function () {
 
     // Admin Iuran CRUD
     Route::middleware('can:access-admin')->group(function () {
+        Route::get('/admin/iurans/{iuran}/proof', [IuranController::class, 'proof'])
+            ->name('admin.iurans.proof');
+
         Route::resource('/admin/iurans', IuranController::class)
             ->except(['show'])
             ->names('admin.iurans');

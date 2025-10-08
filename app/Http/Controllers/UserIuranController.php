@@ -10,22 +10,28 @@ use Inertia\Inertia;
 
 class UserIuranController extends Controller
 {
+    /**
+     * Menampilkan halaman pembayaran untuk jenis iuran tertentu.
+     */
     public function create(Request $request, string $type)
     {
         abort_unless(in_array($type, ['sampah', 'ronda'], true), 404);
 
+        // Pastikan status iuran lama yang melewati periode aktif ditandai ulang.
         Iuran::expireStalePayments();
 
         $user = $request->user();
         $fixedAmount = Iuran::FIXED_AMOUNT;
         $periodMonths = Iuran::PAYMENT_PERIOD_MONTHS;
 
+        // Hitung rentang tanggal yang mewakili periode penagihan saat ini.
         $periodStart = now()->copy()->subMonthsNoOverflow(max(0, $periodMonths - 1))->startOfMonth();
         $periodEnd = now()->copy()->endOfMonth();
         $periodLabel = $periodMonths <= 1
             ? $periodEnd->translatedFormat('F Y')
             : sprintf('%s - %s', $periodStart->translatedFormat('F Y'), $periodEnd->translatedFormat('F Y'));
 
+        // Total nominal yang sudah dibayar user untuk jenis iuran ini.
         $paidSum = (int) Iuran::query()
             ->where('user_id', $user->id)
             ->where('type', $type)
@@ -35,6 +41,7 @@ class UserIuranController extends Controller
         $paidThisPeriod = $paidSum >= $fixedAmount;
         $remaining = max(0, $fixedAmount - $paidSum);
 
+        // Siapkan enam riwayat pembayaran terakhir untuk ditampilkan di halaman.
         $lastPayments = Iuran::query()
             ->where('user_id', $user->id)
             ->where('type', $type)
@@ -50,6 +57,7 @@ class UserIuranController extends Controller
                 'proof_url' => $i->proof_url,
             ]);
 
+        // Cari entri iuran yang masih menunggu bukti atau pembayaran.
         $pendingCandidate = Iuran::query()
             ->where('user_id', $user->id)
             ->where('type', $type)
@@ -85,6 +93,9 @@ class UserIuranController extends Controller
         ]);
     }
 
+    /**
+     * Membuat transaksi Snap Midtrans untuk pembayaran iuran.
+     */
     public function store(Request $request, string $type)
     {
         abort_unless(in_array($type, ['sampah', 'ronda'], true), 404);
@@ -105,18 +116,18 @@ class UserIuranController extends Controller
             'amount' => ['required', 'integer', 'min:1000'],
         ]);
 
-        // Configure Midtrans
+        // Konfigurasi kredensial Midtrans setiap kali request diterima.
         \Midtrans\Config::$serverKey = (string) config('midtrans.server_key');
         \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production');
         \Midtrans\Config::$isSanitized = (bool) config('midtrans.is_sanitized');
         \Midtrans\Config::$is3ds = (bool) config('midtrans.is_3ds');
 
-        // Midtrans order_id has max length (50 chars). Keep it short but unique.
-        // Format: iuran-{type}-{userId}-{rand12}
+        // order_id maximum 50 karakter: format iuran-{jenis}-{user}-{random12} agar mudah dilacak.
         $orderId = sprintf('iuran-%s-%d-%s', $type, $user->id, \Illuminate\Support\Str::random(12));
         $grossAmount = $fixedAmount;
         $itemName = 'Iuran ' . ucfirst($type) . ' ' . $itemPeriodLabel;
 
+        // Catat draft iuran sebelum diarahkan ke gateway pembayaran.
         Iuran::updateOrCreate(
             ['order_id' => $orderId],
             [
@@ -149,7 +160,7 @@ class UserIuranController extends Controller
             ],
         ];
 
-        // Log request context (without secrets)
+        // Log konteks request (tanpa data sensitif) agar mudah ditelusuri saat debug.
         Log::info('Midtrans createTransaction request', [
             'order_id' => $orderId,
             'order_id_len' => strlen($orderId),
@@ -173,7 +184,7 @@ class UserIuranController extends Controller
             if (!$redirectUrl) {
                 return back()->with('message', 'Gagal membuat transaksi Midtrans.');
             }
-            // Tell Inertia to navigate the browser to Midtrans
+            // Inertia::location menginstruksikan browser berpindah ke halaman pembayaran Midtrans.
             return \Inertia\Inertia::location($redirectUrl);
         } catch (\Throwable $e) {
             Log::error('Midtrans createTransaction failed', [
@@ -187,6 +198,9 @@ class UserIuranController extends Controller
         }
     }
 
+    /**
+     * Menyimpan bukti transfer yang diunggah warga.
+     */
     public function storeProof(Request $request, Iuran $iuran)
     {
         $user = $request->user();
@@ -200,6 +214,7 @@ class UserIuranController extends Controller
             Storage::disk('public')->delete($iuran->proof_path);
         }
 
+        // Simpan file bukti di disk publik lalu tandai iuran sebagai lunas.
         $path = $request->file('proof')->store('payment-proofs', 'public');
         $iuran->update([
             'proof_path' => $path,
@@ -210,4 +225,3 @@ class UserIuranController extends Controller
         return back()->with('message', 'Bukti transfer berhasil diunggah.');
     }
 }
-

@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import useResetOnUnmount from '@/Hooks/useResetOnUnmount';
 import { Head, useForm } from '@inertiajs/react';
 
 export default function ConfirmPassword() {
@@ -11,53 +11,50 @@ export default function ConfirmPassword() {
         password: '',
     });
 
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
+    useResetOnUnmount(reset, 'password');
 
     const handleOnChange = (event) => {
         setData(event.target.name, event.target.value);
     };
 
-    const submit = (e) => {
-        e.preventDefault();
-
+    const submit = (event) => {
+        event.preventDefault();
         post(route('password.confirm'));
     };
 
     return (
         <GuestLayout>
-            <Head title="Confirm Password" />
+            <Head title="Konfirmasi Kata Sandi" />
 
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                This is a secure area of the application. Please confirm your password before continuing.
-            </div>
-
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={handleOnChange}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
+            <div className="space-y-6 text-left">
+                <div className="space-y-3">
+                    <span className="badge-soft w-fit">Verifikasi Lanjutan</span>
+                    <div>
+                        <h1 className="text-3xl font-semibold tracking-tight text-white">Konfirmasi kata sandi</h1>
+                        <p className="mt-2 text-sm text-white/60">Untuk keamanan, masukkan kata sandi Anda sebelum melanjutkan proses sensitif.</p>
+                    </div>
                 </div>
 
-                <div className="flex items-center justify-end mt-4">
-                    <PrimaryButton className="ml-4" disabled={processing}>
-                        Confirm
+                <form onSubmit={submit} className="space-y-5">
+                    <div className="space-y-2">
+                        <InputLabel htmlFor="password" value="Kata sandi" />
+                        <TextInput
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={data.password}
+                            isFocused={true}
+                            onChange={handleOnChange}
+                        />
+                        <InputError message={errors.password} className="text-xs text-rose-300" />
+                    </div>
+
+                    <PrimaryButton disabled={processing} className="w-full justify-center">
+                        Konfirmasi
                     </PrimaryButton>
-                </div>
-            </form>
+                </form>
+            </div>
         </GuestLayout>
     );
 }
+

@@ -10,6 +10,9 @@ use Inertia\Inertia;
 
 class AdminDashboardController extends Controller
 {
+    /**
+     * Dashboard admin dengan statistik bulanan dan tren enam bulan.
+     */
     public function __invoke(Request $request)
     {
         Iuran::expireStalePayments();
@@ -27,10 +30,10 @@ class AdminDashboardController extends Controller
         $totalKeseluruhan = (int) (clone $base)->sum('amount');
         $totalSampah = (int) (clone $base)->where('type', 'sampah')->sum('amount');
         $totalRonda = (int) (clone $base)->where('type', 'ronda')->sum('amount');
-        // Families = users who have signed in at least once
+        // Keluarga dihitung dari user yang telah login minimal sekali.
         $totalKeluarga = (int) User::query()->whereNotNull('last_login_at')->count();
 
-        // Trend last 6 months including selected month
+        // Kumpulkan tren enam bulan terakhir termasuk bulan terpilih.
         $trend = [];
         for ($i = 5; $i >= 0; $i--) {
             $s = (clone $start)->copy()->subMonths($i)->startOfMonth();

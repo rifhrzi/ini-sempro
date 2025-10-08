@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Log;
 
 class MidtransController extends Controller
 {
+    /**
+     * Memetakan konfigurasi Midtrans dari file config.
+     */
     private function configure(): void
     {
         \Midtrans\Config::$serverKey = (string) config('midtrans.server_key');
@@ -16,26 +19,37 @@ class MidtransController extends Controller
         \Midtrans\Config::$is3ds = (bool) config('midtrans.is_3ds');
     }
 
+    /**
+     * Callback ketika pengguna menyelesaikan proses pembayaran.
+     */
     public function finish(Request $request)
     {
-        // Users land here after finishing payment page. The final status is confirmed
-        // by the async notification handler.
+        // Status akhir tetap menunggu notifikasi server-to-server agar data akurat.
         return redirect()->route('dashboard')
             ->with('message', 'Terima kasih! Jika pembayaran berhasil, status akan terupdate segera.');
     }
 
+    /**
+     * Callback saat pengguna menutup pembayaran tanpa menyelesaikannya.
+     */
     public function unfinish(Request $request)
     {
         return redirect()->route('dashboard')
             ->with('message', 'Pembayaran belum selesai. Anda dapat mencoba lagi nanti.');
     }
 
+    /**
+     * Callback ketika terjadi error dari sisi Midtrans/Snap.
+     */
     public function error(Request $request)
     {
         return redirect()->route('dashboard')
             ->with('message', 'Terjadi kesalahan saat memproses pembayaran.');
     }
 
+    /**
+     * Endpoint notifikasi server-to-server dari Midtrans.
+     */
     public function notification(Request $request)
     {
         $this->configure();
@@ -52,7 +66,7 @@ class MidtransController extends Controller
         $fraud = (string) ($notif->fraud_status ?? '');
         $gross = (int) ($notif->gross_amount ?? 0);
 
-        // Expect order id format: iuran-{type}-{userId}-{uuid}
+        // Format order id: iuran-{type}-{userId}-{random}
         $parts = explode('-', $orderId);
         if (count($parts) < 4 || $parts[0] !== 'iuran') {
             Log::warning('Unknown order id format', ['order_id' => $orderId]);
@@ -130,7 +144,7 @@ class MidtransController extends Controller
                     }
                 }
             } catch (\Throwable $e) {
-                // In case of duplicate notifications or any other issues, log and continue
+                // Saat notifikasi ganda/ada error, cukup log agar bisa ditelusuri.
                 Log::warning('Midtrans upsert iuran failed (maybe duplicate)', [
                     'error' => $e->getMessage(),
                     'order_id' => $orderId,
@@ -141,4 +155,3 @@ class MidtransController extends Controller
         return response()->json(['ok' => true]);
     }
 }
-

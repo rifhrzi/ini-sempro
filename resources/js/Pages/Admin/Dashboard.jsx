@@ -1,28 +1,30 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import React from 'react';
 import { BanknotesIcon, UsersIcon, TrashIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
 
-const StatCard = ({ label, value, accent = 'primary' }) => {
-    const idr = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
-    const isMoney = typeof value === 'number' && value > 1000;
-    const accentClass = {
-        primary: 'text-primary',
-        secondary: 'text-secondary',
-        info: 'text-info',
-        success: 'text-success',
-        warning: 'text-warning',
-        error: 'text-error',
-    }[accent] || 'text-primary';
-    return (
-        <div className="card bg-base-100 shadow-md border border-gray-100">
-            <div className="card-body">
-                <h4 className="card-title text-gray-700">{label}</h4>
-                <div className={`text-2xl font-bold ${accentClass}`}>{isMoney ? idr(value) : value}</div>
+const formatCurrency = (value) =>
+    new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(value ?? 0);
+
+const StatCard = ({ label, value, icon: Icon, toneClass, accent }) => (
+    <article className="panel-muted relative overflow-hidden px-6 py-6">
+        <div className={`pointer-events-none absolute -top-20 right-0 h-36 w-36 rounded-full ${accent} blur-3xl`} />
+        <div className="flex flex-col gap-5">
+            <div className="flex items-center justify-between">
+                <span className="text-xs uppercase tracking-[0.25em] text-white/50">{label}</span>
+                {Icon && (
+                    <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ${toneClass}`}>
+                        <Icon className="h-6 w-6" />
+                    </span>
+                )}
             </div>
+            <span className="text-3xl font-semibold text-white">{value}</span>
         </div>
-    );
-};
+    </article>
+);
 
 export default function AdminDashboard(props) {
     const { stats, filters, trend } = props;
@@ -30,13 +32,15 @@ export default function AdminDashboard(props) {
     const totalKeluarga = stats?.totalKeluarga ?? 0;
     const totalSampah = stats?.totalSampah ?? 0;
     const totalRonda = stats?.totalRonda ?? 0;
-    const month = filters?.month ?? (new Date().getMonth() + 1);
-    const year = filters?.year ?? (new Date().getFullYear());
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; 
+    const month = filters?.month ?? new Date().getMonth() + 1;
+    const year = filters?.year ?? new Date().getFullYear();
 
-    const onChange = (e) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const yearOptions = Array.from({ length: 5 }, (_, index) => new Date().getFullYear() - index);
+
+    const onChange = (event) => {
         const params = new URLSearchParams(window.location.search);
-        params.set(e.target.name, e.target.value);
+        params.set(event.target.name, event.target.value);
         window.location.href = `${window.location.pathname}?${params.toString()}`;
     };
 
@@ -44,83 +48,132 @@ export default function AdminDashboard(props) {
         <AuthenticatedLayout
             auth={props.auth}
             errors={props.errors}
-            header={<h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Admin Dashboard</h2>}
-        >
-            <Head title="Admin Dashboard" />
-
-            <div className="py-8">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                    {/* Filters */}
-                    <div className="bg-base-100 shadow-md rounded-lg p-4 border border-gray-100 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Bulan</span></label>
-                            <select name="month" value={month} onChange={onChange} className="select select-bordered">
-                                {months.map((m, i) => (
-                                    <option key={i+1} value={i+1}>{m}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Tahun</span></label>
-                            <select name="year" value={year} onChange={onChange} className="select select-bordered">
-                                {Array.from({length: 5}, (_,k) => new Date().getFullYear() - k).map(y => (
-                                    <option key={y} value={y}>{y}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="stats shadow w-full bg-base-100">
-                        <div className="stat">
-                            <div className="stat-figure text-primary"><BanknotesIcon className="w-8 h-8" /></div>
-                            <div className="stat-title">Total Iuran Keseluruhan</div>
-                            <div className="stat-value text-primary">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(collected)}</div>
-                        </div>
-                        <div className="stat">
-                            <div className="stat-figure text-secondary"><UsersIcon className="w-8 h-8" /></div>
-                            <div className="stat-title">Total Data Keluarga</div>
-                            <div className="stat-value text-secondary">{totalKeluarga}</div>
-                            <div className="stat-desc">Keluarga terdata</div>
-                        </div>
-                        <div className="stat">
-                            <div className="stat-figure text-info"><TrashIcon className="w-8 h-8" /></div>
-                            <div className="stat-title">Total Iuran Sampah</div>
-                            <div className="stat-value text-info">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSampah)}</div>
-                        </div>
-                        <div className="stat">
-                            <div className="stat-figure text-success"><ShieldCheckIcon className="w-8 h-8" /></div>
-                            <div className="stat-title">Total Iuran Ronda</div>
-                            <div className="stat-value text-success">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalRonda)}</div>
-                        </div>
-                    </div>
+            header={
+                <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <Link href={route('admin.iurans.index')} className="btn btn-outline">Kelola Iuran</Link>
+                        <span className="badge-soft">Admin Center</span>
+                        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">Dasbor Admin</h2>
+                        <p className="mt-2 text-sm text-white/60">
+                            Ringkasan keuangan dan data warga untuk pengelolaan lingkungan yang elegan dan tertata.
+                        </p>
                     </div>
-
-                    {/* Simple bar chart */}
-                    <div className="bg-base-100 shadow-md rounded-lg p-6 border border-gray-100">
-                        <h4 className="font-semibold text-gray-700 mb-4">Tren 6 Bulan</h4>
-                        <div className="text-sm text-gray-500 mb-2">Total iuran per bulan</div>
-                        {Array.isArray(trend) && trend.length > 0 ? (
-                            <div className="w-full overflow-x-auto">
-                                <div className="grid grid-cols-6 gap-4 items-end h-48">
-                                    {trend.map((t, idx) => {
-                                        const max = Math.max(...trend.map(x => x.keseluruhan || 0), 1);
-                                        const height = Math.round(((t.keseluruhan || 0) / max) * 100);
-                                        return (
-                                            <div key={idx} className="flex flex-col items-center justify-end gap-2">
-                                                <div className="w-8 bg-gradient-to-t from-indigo-500 to-indigo-300 rounded-md" style={{ height: `${height}%` }} title={`${t.label}: ${new Intl.NumberFormat('id-ID').format(t.keseluruhan || 0)}`}></div>
-                                                <div className="text-xs text-gray-500">{t.label}</div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="text-sm text-gray-500">Tidak ada data tren.</div>
-                        )}
+                    <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-xs text-white/60">
+                        <div className="text-white/80">{formatCurrency(collected)}</div>
+                        <div className="mt-1 text-white/50">Total iuran tahun berjalan</div>
                     </div>
                 </div>
+            }
+        >
+            <Head title="Dasbor Admin" />
+
+            <div className="space-y-8">
+                <section className="panel-muted flex flex-wrap items-center justify-between gap-4 px-6 py-6">
+                    <label className="flex items-center gap-3 text-sm text-white/70">
+                        <span className="text-xs uppercase tracking-[0.25em] text-white/40">Bulan</span>
+                        <select
+                            name="month"
+                            value={month}
+                            onChange={onChange}
+                            className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/80 shadow-inner shadow-black/20 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-300/40 focus:ring-offset-2 focus:ring-offset-[#040112]"
+                        >
+                            {months.map((label, index) => (
+                                <option key={index + 1} value={index + 1} className="text-slate-900">
+                                    {label}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                    <label className="flex items-center gap-3 text-sm text-white/70">
+                        <span className="text-xs uppercase tracking-[0.25em] text-white/40">Tahun</span>
+                        <select
+                            name="year"
+                            value={year}
+                            onChange={onChange}
+                            className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/80 shadow-inner shadow-black/20 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-300/40 focus:ring-offset-2 focus:ring-offset-[#040112]"
+                        >
+                            {yearOptions.map((optionYear) => (
+                                <option key={optionYear} value={optionYear} className="text-slate-900">
+                                    {optionYear}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <Link
+                        href={route('admin.iurans.index')}
+                        className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/85 transition hover:border-white/30 hover:bg-white/16"
+                    >
+                        Kelola Iuran
+                    </Link>
+                </section>
+
+                <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <StatCard
+                        label="Total Iuran Keseluruhan"
+                        value={formatCurrency(collected)}
+                        icon={BanknotesIcon}
+                        toneClass="text-emerald-200"
+                        accent="bg-[radial-gradient(circle,rgba(34,197,94,0.22),transparent_60%)]"
+                    />
+                    <StatCard
+                        label="Total Data Keluarga"
+                        value={totalKeluarga}
+                        icon={UsersIcon}
+                        toneClass="text-amber-200"
+                        accent="bg-[radial-gradient(circle,rgba(250,204,21,0.24),transparent_60%)]"
+                    />
+                    <StatCard
+                        label="Total Iuran Sampah"
+                        value={formatCurrency(totalSampah)}
+                        icon={TrashIcon}
+                        toneClass="text-sky-200"
+                        accent="bg-[radial-gradient(circle,rgba(56,189,248,0.24),transparent_60%)]"
+                    />
+                    <StatCard
+                        label="Total Iuran Ronda"
+                        value={formatCurrency(totalRonda)}
+                        icon={ShieldCheckIcon}
+                        toneClass="text-indigo-200"
+                        accent="bg-[radial-gradient(circle,rgba(129,140,248,0.24),transparent_60%)]"
+                    />
+                </section>
+
+                <section className="panel-muted px-6 py-8">
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 className="text-lg font-semibold text-white">Tren 6 Bulan</h3>
+                            <p className="text-sm text-white/55">Total iuran yang masuk per bulan berdasarkan pilihan filter.</p>
+                        </div>
+                        <span className="rounded-full border border-white/15 px-3 py-1 text-xs font-semibold text-white/60">Ringkasan Historis</span>
+                    </div>
+
+                    {Array.isArray(trend) && trend.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <div className="flex h-56 items-end gap-6">
+                                {trend.map((item, index) => {
+                                    const max = Math.max(...trend.map((entry) => entry.keseluruhan || 0), 1);
+                                    const height = Math.round(((item.keseluruhan || 0) / max) * 100);
+                                    return (
+                                        <div key={index} className="flex flex-col items-center gap-3">
+                                            <div className="relative flex h-full w-12 items-end justify-center">
+                                                <div
+                                                    className="w-full rounded-full bg-gradient-to-br from-sky-500 via-indigo-500 to-blue-700 shadow-[0_18px_45px_-20px_rgba(37,99,235,0.8)]"
+                                                    style={{ height: `${height}%` }}
+                                                    title={`${item.label}: ${new Intl.NumberFormat('id-ID').format(item.keseluruhan || 0)}`}
+                                                ></div>
+                                            </div>
+                                            <span className="text-xs text-white/55">{item.label}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-sm text-white/60">
+                            Tidak ada data tren.
+                        </div>
+                    )}
+                </section>
             </div>
         </AuthenticatedLayout>
     );

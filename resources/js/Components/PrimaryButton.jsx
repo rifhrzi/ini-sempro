@@ -1,14 +1,16 @@
 export default function PrimaryButton({ className = '', disabled, children, ...props }) {
+    const baseClass = [
+        'inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold tracking-wide text-white',
+        'bg-gradient-to-r from-sky-500 via-indigo-500 to-blue-700',
+        'shadow-[0_20px_45px_-18px_rgba(37,99,235,0.85)] transition-all duration-300 ease-out',
+        'border border-white/20 backdrop-blur-sm hover:-translate-y-0.5 hover:shadow-[0_26px_55px_-22px_rgba(37,99,235,0.9)]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#040112]',
+        disabled ? 'cursor-not-allowed opacity-60 hover:translate-y-0' : '',
+        className,
+    ].join(' ');
+
     return (
-        <button
-            {...props}
-            className={
-                `inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150 ${
-                    disabled && 'opacity-25'
-                } ` + className
-            }
-            disabled={disabled}
-        >
+        <button {...props} className={baseClass} disabled={disabled}>
             {children}
         </button>
     );

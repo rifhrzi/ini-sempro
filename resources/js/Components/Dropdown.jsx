@@ -23,14 +23,16 @@ const Trigger = ({ children }) => {
 
     return (
         <>
-            <div onClick={toggleOpen}>{children}</div>
+            <div onClick={toggleOpen} className="cursor-pointer select-none">
+                {children}
+            </div>
 
             {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(false)}></div>}
         </>
     );
 };
 
-const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-white dark:bg-gray-700', children }) => {
+const Content = ({ align = 'right', width = '48', contentClasses = '', children }) => {
     const { open, setOpen } = useContext(DropDownContext);
 
     let alignmentClasses = 'origin-top';
@@ -44,8 +46,11 @@ const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-whit
     let widthClasses = '';
 
     if (width === '48') {
-        widthClasses = 'w-48';
+        widthClasses = 'w-56';
     }
+
+    const panelClasses =
+        'rounded-2xl border border-white/15 bg-[#0b1224]/95 p-2 shadow-[0_30px_80px_-40px_rgba(8,9,31,0.9)] backdrop-blur-2xl';
 
     return (
         <>
@@ -55,15 +60,15 @@ const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-whit
                 enter="transition ease-out duration-200"
                 enterFrom="transform opacity-0 scale-95"
                 enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
+                leave="transition ease-in duration-100"
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
             >
                 <div
-                    className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
+                    className={`absolute z-50 mt-3 ${alignmentClasses} ${widthClasses}`}
                     onClick={() => setOpen(false)}
                 >
-                    <div className={`rounded-md ring-1 ring-black ring-opacity-5 ` + contentClasses}>{children}</div>
+                    <div className={`${panelClasses} ${contentClasses}`}>{children}</div>
                 </div>
             </Transition>
         </>
@@ -71,14 +76,14 @@ const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-whit
 };
 
 const DropdownLink = ({ className = '', children, ...props }) => {
+    const baseClass = [
+        'block w-full rounded-xl px-4 py-2.5 text-left text-sm font-medium text-white/80 transition',
+        'hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-300/60',
+        className,
+    ].join(' ');
+
     return (
-        <Link
-            {...props}
-            className={
-                'block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out ' +
-                className
-            }
-        >
+        <Link {...props} className={baseClass}>
             {children}
         </Link>
     );

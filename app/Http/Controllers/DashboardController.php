@@ -10,8 +10,12 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    /**
+     * Menyusun data ringkas untuk dashboard warga.
+     */
     public function index(Request $request)
     {
+        // Perbarui status iuran lama sebelum menghitung statistik.
         Iuran::expireStalePayments();
 
         $target = (int) env('DASHBOARD_MONTHLY_TARGET', 5_000_000);
@@ -19,7 +23,7 @@ class DashboardController extends Controller
         $start = Carbon::now()->startOfMonth();
         $end = (clone $start)->endOfMonth();
 
-        // Count families as users who have signed in at least once
+        // Jumlah keluarga dihitung dari pengguna yang pernah login.
         $familiesCount = (int) User::query()->whereNotNull('last_login_at')->count();
         $collected = (int) Iuran::query()
             ->whereNotNull('paid_at')
@@ -57,4 +61,3 @@ class DashboardController extends Controller
         ]);
     }
 }
-

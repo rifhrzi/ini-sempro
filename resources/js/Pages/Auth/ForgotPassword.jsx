@@ -1,5 +1,6 @@
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, useForm } from '@inertiajs/react';
@@ -13,42 +14,44 @@ export default function ForgotPassword({ status }) {
         setData(event.target.name, event.target.value);
     };
 
-    const submit = (e) => {
-        e.preventDefault();
-
+    const submit = (event) => {
+        event.preventDefault();
         post(route('password.email'));
     };
 
     return (
         <GuestLayout>
-            <Head title="Forgot Password" />
+            <Head title="Lupa Kata Sandi" />
 
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                Forgot your password? No problem. Just let us know your email address and we will email you a password
-                reset link that will allow you to choose a new one.
-            </div>
-
-            {status && <div className="mb-4 font-medium text-sm text-green-600 dark:text-green-400">{status}</div>}
-
-            <form onSubmit={submit}>
-                <TextInput
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={onHandleChange}
-                />
-
-                <InputError message={errors.email} className="mt-2" />
-
-                <div className="flex items-center justify-end mt-4">
-                    <PrimaryButton className="ml-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
+            <div className="space-y-6 text-left">
+                <div className="space-y-3">
+                    <span className="badge-soft w-fit">Keamanan Akun</span>
+                    <div>
+                        <h1 className="text-3xl font-semibold tracking-tight text-white">Lupa kata sandi?</h1>
+                        <p className="mt-2 text-sm text-white/60">
+                            Masukkan email Anda dan kami akan mengirim tautan untuk mengatur ulang kata sandi secara aman.
+                        </p>
+                    </div>
                 </div>
-            </form>
+
+                {status && (
+                    <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/12 px-5 py-4 text-sm text-emerald-200 shadow-[0_20px_50px_-30px_rgba(16,185,129,0.6)]">
+                        {status}
+                    </div>
+                )}
+
+                <form onSubmit={submit} className="space-y-5">
+                    <div className="space-y-2">
+                        <InputLabel htmlFor="email" value="Email" />
+                        <TextInput id="email" type="email" name="email" value={data.email} isFocused={true} onChange={onHandleChange} />
+                        <InputError message={errors.email} className="text-xs text-rose-300" />
+                    </div>
+
+                    <PrimaryButton disabled={processing} className="w-full justify-center">
+                        Kirim tautan reset
+                    </PrimaryButton>
+                </form>
+            </div>
         </GuestLayout>
     );
 }

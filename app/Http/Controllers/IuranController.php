@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Iuran;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class IuranController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar iuran untuk panel admin dengan opsi filter.
      */
     public function index(Request $request)
     {
@@ -41,7 +42,7 @@ class IuranController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan formulir pembuatan iuran manual oleh admin.
      */
     public function create()
     {
@@ -54,7 +55,7 @@ class IuranController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan iuran baru dari input admin.
      */
     public function store(Request $request)
     {
@@ -80,7 +81,7 @@ class IuranController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Menampilkan formulir edit iuran.
      */
     public function edit(Iuran $iuran)
     {
@@ -94,7 +95,7 @@ class IuranController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Memperbarui data iuran yang sudah ada.
      */
     public function update(Request $request, Iuran $iuran)
     {
@@ -120,7 +121,33 @@ class IuranController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menampilkan file bukti pembayaran yang diunggah.
+     */
+    public function proof(Iuran $iuran)
+    {
+        $disk = Storage::disk('public');
+        $path = $iuran->proof_path;
+
+        if (!$path || !$disk->exists($path)) {
+            abort(404, 'Bukti pembayaran tidak ditemukan.');
+        }
+
+        try {
+            $absolutePath = $disk->path($path);
+            $mimeType = $disk->mimeType($path) ?? 'application/octet-stream';
+            $filename = basename($path);
+
+            return response()->file($absolutePath, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
+        } catch (\RuntimeException $exception) {
+            return $disk->response($path);
+        }
+    }
+
+    /**
+     * Menghapus data iuran.
      */
     public function destroy(Iuran $iuran)
     {

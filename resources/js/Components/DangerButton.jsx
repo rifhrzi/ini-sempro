@@ -1,14 +1,16 @@
 export default function DangerButton({ className = '', disabled, children, ...props }) {
+    const baseClass = [
+        'inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold tracking-wide text-white',
+        'bg-gradient-to-r from-rose-600 via-rose-500 to-orange-500',
+        'shadow-[0_20px_45px_-20px_rgba(244,63,94,0.85)] border border-white/15 backdrop-blur-sm',
+        'transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_26px_60px_-24px_rgba(244,63,94,0.9)]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#040112]',
+        disabled ? 'cursor-not-allowed opacity-60 hover:translate-y-0' : '',
+        className,
+    ].join(' ');
+
     return (
-        <button
-            {...props}
-            className={
-                `inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150 ${
-                    disabled && 'opacity-25'
-                } ` + className
-            }
-            disabled={disabled}
-        >
+        <button {...props} className={baseClass} disabled={disabled}>
             {children}
         </button>
     );

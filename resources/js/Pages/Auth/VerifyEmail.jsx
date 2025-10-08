@@ -5,41 +5,47 @@ import { Head, Link, useForm } from '@inertiajs/react';
 export default function VerifyEmail({ status }) {
     const { post, processing } = useForm({});
 
-    const submit = (e) => {
-        e.preventDefault();
-
+    const submit = (event) => {
+        event.preventDefault();
         post(route('verification.send'));
     };
 
     return (
         <GuestLayout>
-            <Head title="Email Verification" />
+            <Head title="Verifikasi Email" />
 
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                Thanks for signing up! Before getting started, could you verify your email address by clicking on the
-                link we just emailed to you? If you didn't receive the email, we will gladly send you another.
-            </div>
-
-            {status === 'verification-link-sent' && (
-                <div className="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-                    A new verification link has been sent to the email address you provided during registration.
+            <div className="space-y-6 text-left">
+                <div className="space-y-3">
+                    <span className="badge-soft w-fit">Aktivasi Akun</span>
+                    <div>
+                        <h1 className="text-3xl font-semibold tracking-tight text-white">Verifikasi email Anda</h1>
+                        <p className="mt-2 text-sm text-white/60">
+                            Kami telah mengirim tautan verifikasi. Tidak menemukan email? Kirim ulang atau keluar untuk menggunakan alamat lain.
+                        </p>
+                    </div>
                 </div>
-            )}
 
-            <form onSubmit={submit}>
-                <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton disabled={processing}>Resend Verification Email</PrimaryButton>
+                {status === 'verification-link-sent' && (
+                    <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/12 px-5 py-4 text-sm text-emerald-200 shadow-[0_20px_50px_-30px_rgba(16,185,129,0.6)]">
+                        Tautan verifikasi baru telah dikirim ke email Anda.
+                    </div>
+                )}
+
+                <form onSubmit={submit} className="grid gap-3">
+                    <PrimaryButton disabled={processing} className="w-full justify-center">
+                        Kirim ulang email verifikasi
+                    </PrimaryButton>
 
                     <Link
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+                        className="inline-flex w-full justify-center rounded-full border border-white/18 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/80 transition hover:border-white/28 hover:bg-white/16"
                     >
-                        Log Out
+                        Keluar
                     </Link>
-                </div>
-            </form>
+                </form>
+            </div>
         </GuestLayout>
     );
 }

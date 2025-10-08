@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import useResetOnUnmount from '@/Hooks/useResetOnUnmount';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
@@ -14,108 +14,104 @@ export default function Register() {
         password_confirmation: '',
     });
 
-    useEffect(() => {
-        return () => {
-            reset('password', 'password_confirmation');
-        };
-    }, []);
+    useResetOnUnmount(reset, 'password', 'password_confirmation');
 
     const handleOnChange = (event) => {
         setData(event.target.name, event.target.type === 'checkbox' ? event.target.checked : event.target.value);
     };
 
-    const submit = (e) => {
-        e.preventDefault();
-
+    const submit = (event) => {
+        event.preventDefault();
         post(route('register'));
     };
 
     return (
         <GuestLayout>
-            <Head title="Register" />
+            <Head title="Daftar" />
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
-
-                    <TextInput
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        className="mt-1 block w-full"
-                        autoComplete="name"
-                        isFocused={true}
-                        onChange={handleOnChange}
-                        required
-                    />
-
-                    <InputError message={errors.name} className="mt-2" />
+            <form onSubmit={submit} className="space-y-7">
+                <div className="space-y-3 text-left">
+                    <span className="badge-soft w-fit">Mulai Bergabung</span>
+                    <div>
+                        <h1 className="text-3xl font-semibold tracking-tight text-white">Buat Akun Baru</h1>
+                        <p className="mt-2 text-sm text-white/60">
+                            Daftarkan diri Anda untuk mengelola iuran, jadwal ronda, dan informasi warga secara elegan.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
+                <div className="space-y-5">
+                    <div className="space-y-2">
+                        <InputLabel htmlFor="name" value="Nama Lengkap" />
+                        <TextInput
+                            id="name"
+                            name="name"
+                            value={data.name}
+                            autoComplete="name"
+                            isFocused={true}
+                            onChange={handleOnChange}
+                            required
+                        />
+                        <InputError message={errors.name} className="text-xs text-rose-300" />
+                    </div>
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={handleOnChange}
-                        required
-                    />
+                    <div className="space-y-2">
+                        <InputLabel htmlFor="email" value="Email" />
+                        <TextInput
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
+                            autoComplete="username"
+                            onChange={handleOnChange}
+                            required
+                        />
+                        <InputError message={errors.email} className="text-xs text-rose-300" />
+                    </div>
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <div className="space-y-2">
+                        <InputLabel htmlFor="password" value="Kata Sandi" />
+                        <TextInput
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={data.password}
+                            autoComplete="new-password"
+                            onChange={handleOnChange}
+                            required
+                        />
+                        <InputError message={errors.password} className="text-xs text-rose-300" />
+                    </div>
+
+                    <div className="space-y-2">
+                        <InputLabel htmlFor="password_confirmation" value="Konfirmasi Kata Sandi" />
+                        <TextInput
+                            id="password_confirmation"
+                            type="password"
+                            name="password_confirmation"
+                            value={data.password_confirmation}
+                            autoComplete="new-password"
+                            onChange={handleOnChange}
+                            required
+                        />
+                        <InputError message={errors.password_confirmation} className="text-xs text-rose-300" />
+                    </div>
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                <div className="grid gap-3 pt-2">
+                    <PrimaryButton disabled={processing} className="w-full justify-center">
+                        Daftar
+                    </PrimaryButton>
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={handleOnChange}
-                        required
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
-
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={handleOnChange}
-                        required
-                    />
-
-                    <InputError message={errors.password_confirmation} className="mt-2" />
-                </div>
-
-                <div className="flex items-center justify-end mt-4">
                     <Link
                         href={route('login')}
-                        className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+                        className="inline-flex w-full justify-center rounded-full border border-white/18 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/80 transition hover:border-white/28 hover:bg-white/16"
                     >
-                        Already registered?
+                        Sudah punya akun? Masuk
                     </Link>
-
-                    <PrimaryButton className="ml-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
                 </div>
             </form>
         </GuestLayout>
     );
 }
+

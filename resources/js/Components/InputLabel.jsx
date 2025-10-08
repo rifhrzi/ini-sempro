@@ -1,6 +1,8 @@
 export default function InputLabel({ value, className = '', children, ...props }) {
+    const baseClass = ['block text-sm font-semibold uppercase tracking-[0.18em] text-white/60', className].join(' ');
+
     return (
-        <label {...props} className={`block font-medium text-sm text-gray-700 dark:text-gray-300 ` + className}>
+        <label {...props} className={baseClass}>
             {value ? value : children}
         </label>
     );
