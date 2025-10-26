@@ -1,4 +1,5 @@
 <?php
+// Membuka tag PHP agar file ini dapat dieksekusi
 
 /*
 |--------------------------------------------------------------------------
@@ -12,8 +13,11 @@
 */
 
 $app = new Illuminate\Foundation\Application(
+// Membuat instance utama aplikasi Laravel
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+    // Menentukan path basis aplikasi dari variabel lingkungan atau folder induk
 );
+// Menyelesaikan pembuatan instance aplikasi
 
 /*
 |--------------------------------------------------------------------------
@@ -27,19 +31,25 @@ $app = new Illuminate\Foundation\Application(
 */
 
 $app->singleton(
+// Mendaftarkan binding singleton untuk kernel HTTP
     Illuminate\Contracts\Http\Kernel::class,
     App\Http\Kernel::class
 );
+// Menentukan kernel HTTP yang akan menangani permintaan web
 
 $app->singleton(
+// Mendaftarkan binding singleton untuk kernel Console
     Illuminate\Contracts\Console\Kernel::class,
     App\Console\Kernel::class
 );
+// Menentukan kernel console yang menjalankan command artisan
 
 $app->singleton(
+// Mendaftarkan binding singleton untuk handler pengecualian
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
 );
+// Menentukan class handler yang mengelola error dan exception
 
 /*
 |--------------------------------------------------------------------------
@@ -53,3 +63,4 @@ $app->singleton(
 */
 
 return $app;
+// Mengembalikan instance aplikasi agar dapat dijalankan oleh entry point
